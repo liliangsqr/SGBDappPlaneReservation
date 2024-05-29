@@ -3,6 +3,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm import sessionmaker
 import sqlalchemy
+import datetime
 import _mysql_connector
 from sqlalchemy.orm.exc import NoResultFound
 
@@ -31,6 +32,7 @@ class Vol(Base):
     arrivee = Column(String(50), nullable=False)
     prix = Column(Integer, nullable=False)
     prestataire = Column(String(50), nullable=False)
+    date = Column(DateTime, nullable=False)  # Nouvelle colonne pour la date du vol
     reservations = relationship('Reservation', back_populates='vol')
 
 

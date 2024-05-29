@@ -28,11 +28,11 @@ class DatabaseManager:
             return "Tous les champs sont obligatoires"
 
     @staticmethod
-    def ajouter_vol(numero_vol, depart, arrivee, prix, presta):
-        if numero_vol and depart and arrivee and prix and presta:
+    def ajouter_vol(numero_vol, depart, arrivee, prix, presta, date_vol):
+        if numero_vol and  depart and arrivee and  prix and  presta and  date_vol:
             try:
-                vol = Vol(numero_vol=numero_vol, depart=depart, arrivee=arrivee, prix=int(prix),
-                          prestataire=presta)
+                vol = Vol(numero_vol=numero_vol, depart=depart, arrivee=arrivee, prix=int(prix), prestataire=presta,
+                          date_vol=date_vol)
                 session.add(vol)
                 session.commit()
                 return "Vol ajouté avec succès"
@@ -366,8 +366,7 @@ class GestionReservationApp:
     def show_ajouter_vol(self):
         self.dialog_ajouter_vol = tk.Toplevel(self.root)
         self.dialog_ajouter_vol.title("Ajouter Vol")
-
-        tk.Label(self.dialog_ajouter_vol, text="Numéro___vol").grid(row=0, column=0)
+        tk.Label(self.dialog_ajouter_vol, text="Numéro de vol").grid(row=0, column=0)
         self.entry_numero_vol = tk.Entry(self.dialog_ajouter_vol)
         self.entry_numero_vol.grid(row=0, column=1)
         tk.Label(self.dialog_ajouter_vol, text="Départ").grid(row=1, column=0)
@@ -382,8 +381,13 @@ class GestionReservationApp:
         tk.Label(self.dialog_ajouter_vol, text="Prestataire").grid(row=4, column=0)
         self.entry_prestataire = tk.Entry(self.dialog_ajouter_vol)
         self.entry_prestataire.grid(row=4, column=1)
-        self.btn_ajouter_vol = tk.Button(self.dialog_ajouter_vol, text="Ajouter Vol", command=self.ajouter_vol_controller)
-        self.btn_ajouter_vol.grid(row=5, columnspan=2)
+        tk.Label(self.dialog_ajouter_vol, text="Date de vol (YYYY-MM-DD)").grid(row=5,
+                                                                                column=0)  # Ajout du champ pour la date
+        self.entry_date_vol = tk.Entry(self.dialog_ajouter_vol)
+        self.entry_date_vol.grid(row=5, column=1)
+        self.btn_ajouter_vol = tk.Button(self.dialog_ajouter_vol, text="Ajouter Vol",
+                                         command=self.ajouter_vol_controller)
+        self.btn_ajouter_vol.grid(row=6, columnspan=2)
 
     def show_ajouter_reservation(self):
         self.dialog_ajouter_reservation = tk.Toplevel(self.root)
