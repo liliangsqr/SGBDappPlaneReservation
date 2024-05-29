@@ -1,5 +1,6 @@
 import tkinter
 import tkinter as tk
+from tkcalendar import Calendar, DateEntry
 from tkinter import messagebox, ttk
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -28,11 +29,11 @@ class DatabaseManager:
             return "Tous les champs sont obligatoires"
 
     @staticmethod
-    def ajouter_vol(numero_vol, depart, arrivee, prix, presta, date_vol):
-        if numero_vol and  depart and arrivee and  prix and  presta and  date_vol:
+    def ajouter_vol(numero_vol, depart, arrivee, prix, presta, datTime):
+        if numero_vol and  depart and arrivee and  prix and  presta and  datTime:
             try:
                 vol = Vol(numero_vol=numero_vol, depart=depart, arrivee=arrivee, prix=int(prix), prestataire=presta,
-                          date_vol=date_vol)
+                          date=datTime)
                 session.add(vol)
                 session.commit()
                 return "Vol ajouté avec succès"
@@ -256,6 +257,7 @@ class GestionReservationApp:
         mot_de_passe = self.entry_mdp_inscription.get()
         message = DatabaseManager.ajouter_utilisateur(nom, email, mot_de_passe)
         messagebox.showinfo("Info", message)
+
     def create_table_views(self,utilisateur):
         if utilisateur == Admin:
             # Table view for Utilisateurs
@@ -268,13 +270,25 @@ class GestionReservationApp:
             self.load_utilisateurs()
 
             # Table view for Vols
-            self.tree_vols = ttk.Treeview(self.tab_vols, columns=("id", "numero_vol", "depart", "arrivee", "prix", "prestataire"), show='headings')
+            self.tree_vols = ttk.Treeview(self.tab_vols, columns=("id", "numero_vol", "depart", "arrivee", "prix", "prestataire","date"), show='headings')
             self.tree_vols.heading("id", text="ID")
             self.tree_vols.heading("numero_vol", text="Numéro de vol")
             self.tree_vols.heading("depart", text="Départ")
             self.tree_vols.heading("arrivee", text="Arrivée")
             self.tree_vols.heading("prix", text="Prix")
             self.tree_vols.heading("prestataire", text="Prestataire")
+            self.tree_vols.heading("date", text="Date & heure")
+            self.tree_vols.pack(expand=1, fill="both")
+            self.load_vols()
+
+            # Configurer les colonnes pour le redimensionnement proportionnel
+            self.tree_vols.column("id", width=50, stretch=tk.YES)
+            self.tree_vols.column("numero_vol", width=100, stretch=tk.YES)
+            self.tree_vols.column("depart", width=100, stretch=tk.YES)
+            self.tree_vols.column("arrivee", width=100, stretch=tk.YES)
+            self.tree_vols.column("prix", width=100, stretch=tk.YES)
+            self.tree_vols.column("prestataire", width=100, stretch=tk.YES)
+            self.tree_vols.column("date", width=150, stretch=tk.YES)
             self.tree_vols.pack(expand=1, fill="both")
             self.load_vols()
 
@@ -288,34 +302,54 @@ class GestionReservationApp:
             self.load_reservations()
         elif utilisateur == None:
             # Table view for Vols
-            self.tree_vols = ttk.Treeview(self.tab_vols,columns=("id", "numero_vol", "depart", "arrivee", "prix", "prestataire"),show='headings')
+            self.tree_vols = ttk.Treeview(self.tab_vols, columns=("id", "numero_vol", "depart", "arrivee", "prix", "prestataire","date"), show='headings')
             self.tree_vols.heading("id", text="ID")
             self.tree_vols.heading("numero_vol", text="Numéro de vol")
             self.tree_vols.heading("depart", text="Départ")
             self.tree_vols.heading("arrivee", text="Arrivée")
             self.tree_vols.heading("prix", text="Prix")
             self.tree_vols.heading("prestataire", text="Prestataire")
+            self.tree_vols.heading("date", text="Date & heure")
+            self.tree_vols.pack(expand=1, fill="both")
+            self.load_vols()
+
+            # Configurer les colonnes pour le redimensionnement proportionnel
+            self.tree_vols.column("id", width=15, stretch=tk.YES)
+            self.tree_vols.column("numero_vol", width=100, stretch=tk.YES)
+            self.tree_vols.column("depart", width=100, stretch=tk.YES)
+            self.tree_vols.column("arrivee", width=100, stretch=tk.YES)
+            self.tree_vols.column("prix", width=100, stretch=tk.YES)
+            self.tree_vols.column("prestataire", width=100, stretch=tk.YES)
+            self.tree_vols.column("date", width=150, stretch=tk.YES)
             self.tree_vols.pack(expand=1, fill="both")
             self.load_vols()
 
         else:
             # Table view for Vols
-            self.tree_vols = ttk.Treeview(self.tab_vols,
-                                          columns=("id", "numero_vol", "depart", "arrivee", "prix", "prestataire"),
-                                          show='headings')
+            self.tree_vols = ttk.Treeview(self.tab_vols,columns=("id", "numero_vol", "depart", "arrivee", "prix", "prestataire","date"),show='headings')
             self.tree_vols.heading("id", text="ID")
             self.tree_vols.heading("numero_vol", text="Numéro de vol")
             self.tree_vols.heading("depart", text="Départ")
             self.tree_vols.heading("arrivee", text="Arrivée")
             self.tree_vols.heading("prix", text="Prix")
             self.tree_vols.heading("prestataire", text="Prestataire")
+            self.tree_vols.heading("date", text="Date & heure")
+            self.tree_vols.pack(expand=1, fill="both")
+            self.load_vols()
+
+            # Configurer les colonnes pour le redimensionnement proportionnel
+            self.tree_vols.column("id", width=100, stretch=tk.YES)
+            self.tree_vols.column("numero_vol", width=100, stretch=tk.YES)
+            self.tree_vols.column("depart", width=100, stretch=tk.YES)
+            self.tree_vols.column("arrivee", width=100, stretch=tk.YES)
+            self.tree_vols.column("prix", width=100, stretch=tk.YES)
+            self.tree_vols.column("prestataire", width=100, stretch=tk.YES)
+            self.tree_vols.column("date", width=150, stretch=tk.YES)
             self.tree_vols.pack(expand=1, fill="both")
             self.load_vols()
 
             # Table view for Reservations
-            self.tree_reservations = ttk.Treeview(self.tab_reservations,
-                                                  columns=("id", "utilisateur_id", "vol_id", "date_reservation"),
-                                                  show='headings')
+            self.tree_reservations = ttk.Treeview(self.tab_reservations,columns=("id", "utilisateur_id", "vol_id", "date_reservation"),show='headings')
             self.tree_reservations.heading("id", text="ID")
             self.tree_reservations.heading("utilisateur_id", text="ID Utilisateur")
             self.tree_reservations.heading("vol_id", text="ID Vol")
@@ -337,7 +371,7 @@ class GestionReservationApp:
             self.tree_vols.delete(item)
         # Charger les nouvelles données
         for vol in DatabaseManager.get_vols():
-            self.tree_vols.insert("", "end", values=(vol.id, vol.numero_vol, vol.depart, vol.arrivee, vol.prix, vol.prestataire))
+            self.tree_vols.insert("", "end", values=(vol.id, vol.numero_vol, vol.depart, vol.arrivee, vol.prix, vol.prestataire,vol.date))
 
     def load_reservations(self):
         # Effacer les éléments existants
@@ -362,6 +396,8 @@ class GestionReservationApp:
         self.entry_mdp.grid(row=2, column=1)
         self.btn_ajouter_utilisateur = tk.Button(self.dialog_ajouter_utilisateur, text="Ajouter Utilisateur", command=self.ajouter_utilisateur)
         self.btn_ajouter_utilisateur.grid(row=3, columnspan=2)
+        self.dialog_ajouter_utilisateur.grab_set()
+        root.wait_window(self.dialog_ajouter_utilisateur)
 
     def show_ajouter_vol(self):
         self.dialog_ajouter_vol = tk.Toplevel(self.root)
@@ -381,13 +417,24 @@ class GestionReservationApp:
         tk.Label(self.dialog_ajouter_vol, text="Prestataire").grid(row=4, column=0)
         self.entry_prestataire = tk.Entry(self.dialog_ajouter_vol)
         self.entry_prestataire.grid(row=4, column=1)
-        tk.Label(self.dialog_ajouter_vol, text="Date de vol (YYYY-MM-DD)").grid(row=5,
+        tk.Label(self.dialog_ajouter_vol, text="Date de vol (YYYY-MM-DD HH:MM)").grid(row=5,
                                                                                 column=0)  # Ajout du champ pour la date
         self.entry_date_vol = tk.Entry(self.dialog_ajouter_vol)
         self.entry_date_vol.grid(row=5, column=1)
         self.btn_ajouter_vol = tk.Button(self.dialog_ajouter_vol, text="Ajouter Vol",
                                          command=self.ajouter_vol_controller)
         self.btn_ajouter_vol.grid(row=6, columnspan=2)
+
+        self.dialog_ajouter_vol.grab_set()
+        root.wait_window(self.dialog_ajouter_vol)
+    def get_selected_datetime(self):
+        selected_date = self.cal.get_date()
+        selected_hour = self.hour_var.get()
+        selected_minute = self.minute_var.get()
+        selected_time = f"{selected_hour}:{selected_minute}"
+        datetime_str = f"{selected_date} {selected_time}"
+        datetime_obj = datetime.strptime(datetime_str, "%m/%d/%y %H:%M")
+        print("Selected Date and Time:", datetime_obj)
 
     def show_ajouter_reservation(self):
         self.dialog_ajouter_reservation = tk.Toplevel(self.root)
@@ -405,6 +452,9 @@ class GestionReservationApp:
                                                  command=self.ajouter_reservation)
         self.btn_ajouter_reservation.grid(row=2, columnspan=2)
 
+        self.dialog_ajouter_reservation.grab_set()
+        root.wait_window(self.dialog_ajouter_reservation)
+
     def show_supprimer_vol(self):
         self.dialog_supprimer_vol = tk.Toplevel(self.root)
         self.dialog_supprimer_vol.title("Supprimer Vol")
@@ -414,6 +464,9 @@ class GestionReservationApp:
         self.entry_vol_id_supprimer.grid(row=0, column=1)
         self.btn_supprimer_vol = tk.Button(self.dialog_supprimer_vol, text="Supprimer Vol", command=self.supprimer_vol)
         self.btn_supprimer_vol.grid(row=0, column=2)
+
+        self.dialog_supprimer_vol.grab_set()
+        root.wait_window(self.dialog_supprimer_vol)
 
     def show_annuler_reservation(self):
         self.dialog_annuler_reservation = tk.Toplevel(self.root)
@@ -425,6 +478,9 @@ class GestionReservationApp:
         self.btn_annuler_reservation = tk.Button(self.dialog_annuler_reservation, text="Annuler Réservation", command=self.annuler_reservation)
         self.btn_annuler_reservation.grid(row=0, column=2)
 
+        self.dialog_annuler_reservation.grab_set()
+        root.wait_window(self.dialog_annuler_reservation)
+
     def show_supprimer_utilisateur(self):
         self.dialog_supprimer_utilisateur = tk.Toplevel(self.root)
         self.dialog_supprimer_utilisateur.title("Supprimer Utilisateur")
@@ -435,6 +491,9 @@ class GestionReservationApp:
         self.btn_supprimer_utilisateur = tk.Button(self.dialog_supprimer_utilisateur, text="Supprimer Utilisateur", command=self.supprimer_utilisateur)
         self.btn_supprimer_utilisateur.grid(row=0, column=2)
 
+        self.dialog_supprimer_utilisateur.grab_set()
+        root.wait_window(self.dialog_supprimer_utilisateur)
+
     def ajouter_utilisateur(self):
         nom = self.entry_nom.get()
         email = self.entry_email.get()
@@ -442,6 +501,7 @@ class GestionReservationApp:
         message = DatabaseManager.ajouter_utilisateur(nom, email, mot_de_passe)
         messagebox.showinfo("Info", message)
         self.load_utilisateurs()
+        self.dialog_ajouter_utilisateur.destroy()
 
     def ajouter_reservation(self):
         utilisateur_id = self.entry_utilisateur_id_reservation.get()
@@ -449,6 +509,7 @@ class GestionReservationApp:
         message = DatabaseManager.faire_reservation(utilisateur_id, vol_id)
         messagebox.showinfo("Info", message)
         self.load_reservations()
+        self.dialog_annuler_reservation.destroy()
 
     def ajouter_vol_controller(self):
         numero_vol = self.entry_numero_vol.get()
@@ -456,18 +517,12 @@ class GestionReservationApp:
         arrivee = self.entry_arrivee.get()
         prix = self.entry_prix.get()
         prestataire = self.entry_prestataire.get()
-        message = DatabaseManager.ajouter_vol(numero_vol, depart, arrivee, prix, prestataire)
+        date = self.entry_date_vol.get()
+        message = DatabaseManager.ajouter_vol(numero_vol, depart, arrivee, prix, prestataire,date)
         messagebox.showinfo("Info", message)
         self.load_vols()
         self.dialog_ajouter_vol.destroy()
 
-    def faire_reservation(self):
-        utilisateur_id = self.entry_utilisateur_id.get()
-        vol_id = self.entry_vol_id.get()
-        message = DatabaseManager.faire_reservation(utilisateur_id, vol_id)
-        messagebox.showinfo("Info", message)
-        self.load_reservations()
-        self.dialog_ajouter_reservation.destroy()
 
     def supprimer_vol(self):
         vol_id = self.entry_vol_id_supprimer.get()
@@ -487,12 +542,19 @@ class GestionReservationApp:
         messagebox.showinfo("Info", message)
         self.load_utilisateurs()
 
+def make_fullscreen_windowed(self):
+    root.update_idletasks()
+    width = root.winfo_screenwidth()
+    height = root.winfo_screenheight()
+    root.geometry(f"{width}x{height}+0+0")
+    root.state('zoomed')  # Optional: This makes the window maximized if supported by the OS
 
 if __name__ == "__main__":
     root = tk.Tk()
-    root.geometry("1200x600")
+    root.geometry("900x600")
+    #make_fullscreen_windowed(root)
     CurrentUser = None
     Admin = session.query(Utilisateur).filter_by(nom="Admin").first()
-
     app = GestionReservationApp(root)
+
     root.mainloop()
