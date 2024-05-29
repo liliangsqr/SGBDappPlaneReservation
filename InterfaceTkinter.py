@@ -118,6 +118,8 @@ class GestionReservationApp:
         self.root.title("Gestion de Réservations")
         self.create_menu()
         self.create_widgets()
+
+    #region Initialisation de l'affichage et connexion--------------------------------------------------------------------------
     def status_boutons(self,bouton,utilisateur_id):
         if utilisateur_id != 15:
             bouton.config(state=tkinter.DISABLED)
@@ -212,6 +214,7 @@ class GestionReservationApp:
         mot_de_passe = self.entry_mdp_inscription.get()
         message = DatabaseManager.ajouter_utilisateur(nom, email, mot_de_passe)
         messagebox.showinfo("Info", message)
+#endregion
 
     #region ActualisationTables-------------------------------------------------------------------------------------------------
     def affichage_des_tables(self,utilisateur):
@@ -480,8 +483,7 @@ class GestionReservationApp:
 
 #endregion
 
-
-#region Controllers ajout et suppression
+    #region Controllers-------------------------------------------------------------------------------------------------
     def ajouter_utilisateur(self):
         nom = self.entry_nom.get()
         email = self.entry_email.get()
@@ -521,15 +523,15 @@ class GestionReservationApp:
         messagebox.showinfo("Info", message)
         self.load_reservations()
         self.dialog_annuler_reservation.destroy()
-
     def supprimer_utilisateur(self):
         utilisateur_id = self.entry_utilisateur_id_supprimer.get()
         message = DatabaseManager.supprimer_utilisateur(utilisateur_id)
         messagebox.showinfo("Info", message)
         self.load_utilisateurs()
         self.dialog_supprimer_utilisateur.destroy()
-
 #endregion
+
+
 
 
 def make_fullscreen_windowed(self):
