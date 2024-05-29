@@ -1,6 +1,5 @@
 import tkinter
 import tkinter as tk
-from tkcalendar import Calendar, DateEntry
 from tkinter import messagebox, ttk
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -119,19 +118,14 @@ class GestionReservationApp:
         self.root.title("Gestion de Réservations")
         self.create_menu()
         self.create_widgets()
-
-
     def status_boutons(self,bouton,utilisateur_id):
         if utilisateur_id != 15:
             bouton.config(state=tkinter.DISABLED)
-
     def create_menu(self):
         self.menu_bar = tk.Menu(self.root)
         self.root.config(menu=self.menu_bar)
         self.menu_ajouter = tk.Menu(self.menu_bar, tearoff=0)
         self.menu_supprimer = tk.Menu(self.menu_bar, tearoff=0)
-
-
     def create_widgets(self):
         # Création de la page de connexion
         self.frame_connexion = tk.Frame(self.root)
@@ -169,44 +163,6 @@ class GestionReservationApp:
         self.tab_control.add(self.tab_vols, text='Vols')
 
         self.create_table_views(None)
-
-    def affichage_des_tables(self,utilisateur):
-        if utilisateur == Admin:
-            # Affichage des tables
-            self.frame_tables = tk.Frame(self.root)
-            self.frame_tables.pack(pady=10)
-
-            self.tab_control = ttk.Notebook(self.frame_tables)
-            self.tab_control.pack(expand=1, fill="both")
-
-            self.tab_utilisateurs = ttk.Frame(self.tab_control)
-            self.tab_vols = ttk.Frame(self.tab_control)
-            self.tab_reservations = ttk.Frame(self.tab_control)
-
-            self.tab_control.add(self.tab_utilisateurs, text='Utilisateurs')
-            self.tab_control.add(self.tab_vols, text='Vols')
-            self.tab_control.add(self.tab_reservations, text='Réservations')
-
-            self.create_table_views(utilisateur)
-        else :
-            # Affichage des tables
-            self.frame_tables = tk.Frame(self.root)
-            self.frame_tables.pack(pady=10)
-
-            self.tab_control = ttk.Notebook(self.frame_tables)
-            self.tab_control.pack(expand=1, fill="both")
-
-            self.tab_vols = ttk.Frame(self.tab_control)
-            self.tab_reservations = ttk.Frame(self.tab_control)
-
-            self.tab_control.add(self.tab_vols, text='Vols')
-            self.tab_control.add(self.tab_reservations, text='Vos Réservation')
-
-            self.create_table_views(utilisateur)
-
-
-
-
     def connexion(self):
         email = self.entry_email_connexion.get()
         mot_de_passe = self.entry_mdp_connexion.get()
@@ -250,7 +206,6 @@ class GestionReservationApp:
 
         else:
             messagebox.showerror("Erreur", "Email ou mot de passe incorrect")
-
     def inscription(self):
         nom = self.entry_nom_inscription.get()
         email = self.entry_email_inscription.get()
@@ -258,6 +213,40 @@ class GestionReservationApp:
         message = DatabaseManager.ajouter_utilisateur(nom, email, mot_de_passe)
         messagebox.showinfo("Info", message)
 
+    #region ActualisationTables-------------------------------------------------------------------------------------------------
+    def affichage_des_tables(self,utilisateur):
+        if utilisateur == Admin:
+            # Affichage des tables
+            self.frame_tables = tk.Frame(self.root)
+            self.frame_tables.pack(pady=10)
+
+            self.tab_control = ttk.Notebook(self.frame_tables)
+            self.tab_control.pack(expand=1, fill="both")
+
+            self.tab_utilisateurs = ttk.Frame(self.tab_control)
+            self.tab_vols = ttk.Frame(self.tab_control)
+            self.tab_reservations = ttk.Frame(self.tab_control)
+
+            self.tab_control.add(self.tab_utilisateurs, text='Utilisateurs')
+            self.tab_control.add(self.tab_vols, text='Vols')
+            self.tab_control.add(self.tab_reservations, text='Réservations')
+
+            self.create_table_views(utilisateur)
+        else :
+            # Affichage des tables
+            self.frame_tables = tk.Frame(self.root)
+            self.frame_tables.pack(pady=10)
+
+            self.tab_control = ttk.Notebook(self.frame_tables)
+            self.tab_control.pack(expand=1, fill="both")
+
+            self.tab_vols = ttk.Frame(self.tab_control)
+            self.tab_reservations = ttk.Frame(self.tab_control)
+
+            self.tab_control.add(self.tab_vols, text='Vols')
+            self.tab_control.add(self.tab_reservations, text='Vos Réservation')
+
+            self.create_table_views(utilisateur)
     def create_table_views(self,utilisateur):
         if utilisateur == Admin:
             # Table view for Utilisateurs
@@ -381,7 +370,9 @@ class GestionReservationApp:
         # Charger les nouvelles données
         for reservation in DatabaseManager.get_reservations():
             self.tree_reservations.insert("", "end", values=(reservation.id, reservation.utilisateur_id, reservation.vol_id, reservation.date_reservation))
+#endregion
 
+    #region SHOW----------------------------------------------------------------------------------------------------------------
     def show_ajouter_utilisateur(self):
         self.dialog_ajouter_utilisateur = tk.Toplevel(self.root)
         self.dialog_ajouter_utilisateur.title("Ajouter Utilisateur")
@@ -428,14 +419,6 @@ class GestionReservationApp:
 
         self.dialog_ajouter_vol.grab_set()
         root.wait_window(self.dialog_ajouter_vol)
-    def get_selected_datetime(self):
-        selected_date = self.cal.get_date()
-        selected_hour = self.hour_var.get()
-        selected_minute = self.minute_var.get()
-        selected_time = f"{selected_hour}:{selected_minute}"
-        datetime_str = f"{selected_date} {selected_time}"
-        datetime_obj = datetime.strptime(datetime_str, "%m/%d/%y %H:%M")
-        print("Selected Date and Time:", datetime_obj)
 
     def show_ajouter_reservation(self):
         self.dialog_ajouter_reservation = tk.Toplevel(self.root)
@@ -495,6 +478,10 @@ class GestionReservationApp:
         self.dialog_supprimer_utilisateur.grab_set()
         root.wait_window(self.dialog_supprimer_utilisateur)
 
+#endregion
+
+
+#region Controllers
     def ajouter_utilisateur(self):
         nom = self.entry_nom.get()
         email = self.entry_email.get()
@@ -524,7 +511,6 @@ class GestionReservationApp:
         self.load_vols()
         self.dialog_ajouter_vol.destroy()
 
-
     def supprimer_vol(self):
         vol_id = self.entry_vol_id_supprimer.get()
         message = DatabaseManager.supprimer_vol(vol_id)
@@ -542,6 +528,9 @@ class GestionReservationApp:
         message = DatabaseManager.supprimer_utilisateur(utilisateur_id)
         messagebox.showinfo("Info", message)
         self.load_utilisateurs()
+
+#endregion
+
 
 def make_fullscreen_windowed(self):
     root.update_idletasks()
