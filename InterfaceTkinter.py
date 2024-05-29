@@ -481,7 +481,7 @@ class GestionReservationApp:
 #endregion
 
 
-#region Controllers
+#region Controllers ajout et suppression
     def ajouter_utilisateur(self):
         nom = self.entry_nom.get()
         email = self.entry_email.get()
@@ -490,15 +490,14 @@ class GestionReservationApp:
         messagebox.showinfo("Info", message)
         self.load_utilisateurs()
         self.dialog_ajouter_utilisateur.destroy()
-
+        self.dialog_ajouter_utilisateur.destroy()
     def ajouter_reservation(self):
         utilisateur_id = self.entry_utilisateur_id_reservation.get()
         vol_id = self.entry_vol_id_reservation.get()
         message = DatabaseManager.faire_reservation(utilisateur_id, vol_id)
         messagebox.showinfo("Info", message)
         self.load_reservations()
-        self.dialog_annuler_reservation.destroy()
-
+        self.dialog_ajouter_reservation.destroy()
     def ajouter_vol_controller(self):
         numero_vol = self.entry_numero_vol.get()
         depart = self.entry_depart.get()
@@ -510,24 +509,25 @@ class GestionReservationApp:
         messagebox.showinfo("Info", message)
         self.load_vols()
         self.dialog_ajouter_vol.destroy()
-
     def supprimer_vol(self):
         vol_id = self.entry_vol_id_supprimer.get()
         message = DatabaseManager.supprimer_vol(vol_id)
         messagebox.showinfo("Info", message)
         self.load_vols()
-
+        self.dialog_supprimer_vol.destroy()
     def annuler_reservation(self):
         reservation_id = self.entry_reservation_id_annuler.get()
         message = DatabaseManager.annuler_reservation(reservation_id)
         messagebox.showinfo("Info", message)
         self.load_reservations()
+        self.dialog_annuler_reservation.destroy()
 
     def supprimer_utilisateur(self):
         utilisateur_id = self.entry_utilisateur_id_supprimer.get()
         message = DatabaseManager.supprimer_utilisateur(utilisateur_id)
         messagebox.showinfo("Info", message)
         self.load_utilisateurs()
+        self.dialog_supprimer_utilisateur.destroy()
 
 #endregion
 
