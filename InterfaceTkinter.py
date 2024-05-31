@@ -44,10 +44,22 @@ class DatabaseManager:
 
     @staticmethod
     def faire_reservation(utilisateur_id, vol_id):
-        if utilisateur_id and vol_id:
+
+        if currentID == Admin.id and vol_id:
             try:
                 date_reservation = datetime.now()
                 reservation = Reservation(utilisateur_id=int(utilisateur_id), vol_id=int(vol_id),
+                                          date_reservation=date_reservation)
+                session.add(reservation)
+                session.commit()
+                return "Réservation effectuée avec succès"
+            except Exception as e:
+                session.rollback()
+                return f"Erreur lors de la réservation : {e}"
+        elif currentID != Admin.id and vol_id:
+            try:
+                date_reservation = datetime.now()
+                reservation = Reservation(utilisateur_id=int(currentID), vol_id=int(vol_id),
                                           date_reservation=date_reservation)
                 session.add(reservation)
                 session.commit()
@@ -86,16 +98,31 @@ class DatabaseManager:
 
     @staticmethod
     def annuler_reservation(reservation_id):
-        try:
-            reservation = session.query(Reservation).filter_by(id=reservation_id).first()
-            if reservation:
-                session.delete(reservation)
-                session.commit()
-                return "Réservation annulée avec succès"
-            else:
-                return "Réservation non trouvée"
-        except Exception as e:
-            session.rollback()
+        if currentID == Admin.id :
+            try:
+                reservation = session.query(Reservation).filter_by(id=reservation_id).first()
+                if reservation:
+                    session.delete(reservation)
+                    session.commit()
+                    return "Réservation annulée avec succès"
+                else:
+                    return "Réservation non trouvée"
+
+            except Exception as e:
+                session.rollback()
+            return f"Erreur lors de l'annulation de la réservation : {e}"
+        elif currentID != Admin.id :
+            try:
+                reservation = session.query(Reservation).filter_by(id=reservation_id, utilisateur_id=currentID).first()
+                if reservation:
+                    session.delete(reservation)
+                    session.commit()
+                    return "Réservation annulée avec succès"
+                else:
+                    return "Réservation non trouvée"
+
+            except Exception as e:
+                session.rollback()
             return f"Erreur lors de l'annulation de la réservation : {e}"
 
     @staticmethod
@@ -168,10 +195,15 @@ class GestionReservationApp:
     def connexion(self):
         email = self.entry_email_connexion.get()
         mot_de_passe = self.entry_mdp_connexion.get()
-        utilisateur = session.query(Utilisateur).filter_by(email=email, mot_de_passe=mot_de_passe).first()
-        if utilisateur == Admin:
-            self.logged_in_user = utilisateur
-            messagebox.showinfo("Info", f"Bienvenue, {utilisateur.nom} !")
+        currentUser = session.query(Utilisateur).filter_by(email=email, mot_de_passe=mot_de_passe).first()
+
+        global currentID
+        currentID = currentUser.id
+        print(currentID)
+
+        if currentUser == Admin:
+            self.logged_in_user = currentUser
+            messagebox.showinfo("Info", f"Bienvenue, {currentUser.nom} !")
             self.frame_connexion.pack_forget()  # Masquer la page de connexion après la connexion réussie
             self.frame_inscription.pack_forget()  # Masquer la page d'inscription après la connexion réussie
             self.frame_tables.pack_forget();
@@ -187,11 +219,11 @@ class GestionReservationApp:
             self.menu_supprimer.add_command(label="Réservation", command=self.show_annuler_reservation)
             self.menu_bar.add_cascade(label="Déconnexion",command=self.root.quit)
 
-            self.affichage_des_tables(utilisateur)
+            self.affichage_des_tables(currentUser)
 
-        elif utilisateur != Admin and utilisateur:
-            self.logged_in_user = utilisateur
-            messagebox.showinfo("Info", f"Bienvenue, {utilisateur.nom} !")
+        elif currentUser != Admin and currentUser:
+            self.logged_in_user = currentUser
+            messagebox.showinfo("Info", f"Bienvenue, {currentUser.nom} !")
             self.frame_connexion.pack_forget()  # Masquer la page de connexion après la connexion réussie
             self.frame_inscription.pack_forget()  # Masquer la page d'inscription après la connexion réussie
             self.frame_tables.pack_forget(); #Masque la table d'accueil
@@ -204,7 +236,7 @@ class GestionReservationApp:
             self.menu_supprimer.add_command(label="Réservation", command=self.show_annuler_reservation)
             self.menu_bar.add_cascade(label="Déconnexion",command=self.root.quit)
 
-            self.affichage_des_tables(utilisateur)
+            self.affichage_des_tables(currentUser)
 
         else:
             messagebox.showerror("Erreur", "Email ou mot de passe incorrect")
@@ -424,23 +456,39 @@ class GestionReservationApp:
         root.wait_window(self.dialog_ajouter_vol)
 
     def show_ajouter_reservation(self):
-        self.dialog_ajouter_reservation = tk.Toplevel(self.root)
-        self.dialog_ajouter_reservation.title("Ajouter Réservation")
+        if currentID == Admin.id:
+            self.dialog_ajouter_reservation = tk.Toplevel(self.root)
+            self.dialog_ajouter_reservation.title("Ajouter Réservation")
 
-        tk.Label(self.dialog_ajouter_reservation, text="ID Utilisateur").grid(row=0, column=0)
-        self.entry_utilisateur_id_reservation = tk.Entry(self.dialog_ajouter_reservation)
-        self.entry_utilisateur_id_reservation.grid(row=0, column=1)
+            tk.Label(self.dialog_ajouter_reservation, text="ID Utilisateur").grid(row=0, column=0)
+            self.entry_utilisateur_id_reservation = tk.Entry(self.dialog_ajouter_reservation)
+            self.entry_utilisateur_id_reservation.grid(row=0, column=1)
 
-        tk.Label(self.dialog_ajouter_reservation, text="ID Vol").grid(row=1, column=0)
-        self.entry_vol_id_reservation = tk.Entry(self.dialog_ajouter_reservation)
-        self.entry_vol_id_reservation.grid(row=1, column=1)
+            tk.Label(self.dialog_ajouter_reservation, text="ID Vol").grid(row=1, column=0)
+            self.entry_vol_id_reservation = tk.Entry(self.dialog_ajouter_reservation)
+            self.entry_vol_id_reservation.grid(row=1, column=1)
 
-        self.btn_ajouter_reservation = tk.Button(self.dialog_ajouter_reservation, text="Ajouter Réservation",
-                                                 command=self.ajouter_reservation)
-        self.btn_ajouter_reservation.grid(row=2, columnspan=2)
+            self.btn_ajouter_reservation = tk.Button(self.dialog_ajouter_reservation, text="Ajouter Réservation",
+                                                     command=self.ajouter_reservation)
+            self.btn_ajouter_reservation.grid(row=2, columnspan=2)
 
-        self.dialog_ajouter_reservation.grab_set()
-        root.wait_window(self.dialog_ajouter_reservation)
+            self.dialog_ajouter_reservation.grab_set()
+            root.wait_window(self.dialog_ajouter_reservation)
+
+        elif currentID != Admin.id :
+            self.dialog_ajouter_reservation = tk.Toplevel(self.root)
+            self.dialog_ajouter_reservation.title("Ajouter Réservation")
+
+            tk.Label(self.dialog_ajouter_reservation, text="ID Vol").grid(row=1, column=0)
+            self.entry_vol_id_reservation = tk.Entry(self.dialog_ajouter_reservation)
+            self.entry_vol_id_reservation.grid(row=1, column=1)
+
+            self.btn_ajouter_reservation = tk.Button(self.dialog_ajouter_reservation, text="Ajouter Réservation",
+                                                     command=self.ajouter_reservation)
+            self.btn_ajouter_reservation.grid(row=2, columnspan=2)
+
+            self.dialog_ajouter_reservation.grab_set()
+            root.wait_window(self.dialog_ajouter_reservation)
 
     def show_supprimer_vol(self):
         self.dialog_supprimer_vol = tk.Toplevel(self.root)
@@ -483,7 +531,7 @@ class GestionReservationApp:
 
 #endregion
 
-    #region Controllers-------------------------------------------------------------------------------------------------
+    #region Ajouter supprimer-----------------------------------------------------------------------------------------------------
     def ajouter_utilisateur(self):
         nom = self.entry_nom.get()
         email = self.entry_email.get()
@@ -494,12 +542,22 @@ class GestionReservationApp:
         self.dialog_ajouter_utilisateur.destroy()
         self.dialog_ajouter_utilisateur.destroy()
     def ajouter_reservation(self):
-        utilisateur_id = self.entry_utilisateur_id_reservation.get()
-        vol_id = self.entry_vol_id_reservation.get()
-        message = DatabaseManager.faire_reservation(utilisateur_id, vol_id)
-        messagebox.showinfo("Info", message)
-        self.load_reservations()
-        self.dialog_ajouter_reservation.destroy()
+        if currentID == Admin.id :
+            utilisateur_id = self.entry_utilisateur_id_reservation.get()
+            vol_id = self.entry_vol_id_reservation.get()
+            message = DatabaseManager.faire_reservation(utilisateur_id, vol_id)
+            messagebox.showinfo("Info", message)
+            self.load_reservations()
+            self.dialog_ajouter_reservation.destroy()
+        elif currentID != (Admin.id+1) :
+            print(currentID)
+            print("currentID != Admin.id")
+            vol_id = self.entry_vol_id_reservation.get()
+            message = DatabaseManager.faire_reservation(currentID, vol_id)
+            messagebox.showinfo("Info", message)
+            self.load_reservations()
+            self.dialog_ajouter_reservation.destroy()
+
     def ajouter_vol_controller(self):
         numero_vol = self.entry_numero_vol.get()
         depart = self.entry_depart.get()
@@ -545,7 +603,6 @@ if __name__ == "__main__":
     root = tk.Tk()
     root.geometry("900x600")
     #make_fullscreen_windowed(root)
-    CurrentUser = None
     Admin = session.query(Utilisateur).filter_by(nom="Admin").first()
     app = GestionReservationApp(root)
 
