@@ -75,6 +75,10 @@ class DatabaseManager:
         return session.query(Utilisateur).all()
 
     @staticmethod
+    def get_reservations_for_user(user_id):
+        return session.query(Reservation).filter_by(utilisateur_id=user_id).all()
+
+    @staticmethod
     def get_vols():
         return session.query(Vol).all()
 
@@ -138,7 +142,6 @@ class DatabaseManager:
         except Exception as e:
             session.rollback()
             return f"Erreur lors de la suppression de l'utilisateur : {e}"
-
 class GestionReservationApp:
     def __init__(self, root):
         self.root = root
@@ -283,7 +286,7 @@ class GestionReservationApp:
 
             self.create_table_views(utilisateur)
     def create_table_views(self,utilisateur):
-        if utilisateur == Admin:
+        if utilisateur == Admin and utilisateur:
             # Table view for Utilisateurs
             self.tree_utilisateurs = ttk.Treeview(self.tab_utilisateurs, columns=("id", "nom", "email", "mot_de_passe"), show='headings')
             self.tree_utilisateurs.heading("id", text="ID")
@@ -324,6 +327,7 @@ class GestionReservationApp:
             self.tree_reservations.heading("date_reservation", text="Date de Réservation")
             self.tree_reservations.pack(expand=1, fill="both")
             self.load_reservations()
+
         elif utilisateur == None:
             # Table view for Vols
             self.tree_vols = ttk.Treeview(self.tab_vols, columns=("id", "numero_vol", "depart", "arrivee", "prix", "prestataire","date"), show='headings')
@@ -402,9 +406,16 @@ class GestionReservationApp:
         # Effacer les éléments existants
         for item in self.tree_reservations.get_children():
             self.tree_reservations.delete(item)
+
         # Charger les nouvelles données
-        for reservation in DatabaseManager.get_reservations():
-            self.tree_reservations.insert("", "end", values=(reservation.id, reservation.utilisateur_id, reservation.vol_id, reservation.date_reservation))
+        if self.logged_in_user == Admin:
+            reservations = DatabaseManager.get_reservations()
+        else:
+            reservations = DatabaseManager.get_reservations_for_user(self.logged_in_user.id)
+
+        for reservation in reservations:
+            self.tree_reservations.insert("", "end", values=(
+            reservation.id, reservation.utilisateur_id, reservation.vol_id, reservation.date_reservation))
 #endregion
 
     #region SHOW----------------------------------------------------------------------------------------------------------------
@@ -557,7 +568,6 @@ class GestionReservationApp:
             messagebox.showinfo("Info", message)
             self.load_reservations()
             self.dialog_ajouter_reservation.destroy()
-
     def ajouter_vol_controller(self):
         numero_vol = self.entry_numero_vol.get()
         depart = self.entry_depart.get()
