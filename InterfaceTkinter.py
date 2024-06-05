@@ -155,7 +155,7 @@ class GestionReservationApp:
             bouton.config(state=tkinter.DISABLED)
     def create_menu(self):
         self.menu_bar = tk.Menu(self.root)
-        self.root.config(menu=self.menu_bar)
+        self.root.config(menu=self.menu_bar,background="#93441A")
         self.menu_ajouter = tk.Menu(self.menu_bar, tearoff=0)
         self.menu_supprimer = tk.Menu(self.menu_bar, tearoff=0)
     def create_widgets(self):
@@ -402,6 +402,7 @@ class GestionReservationApp:
         for vol in DatabaseManager.get_vols():
             self.tree_vols.insert("", "end", values=(vol.id, vol.numero_vol, vol.depart, vol.arrivee, vol.prix, vol.prestataire,vol.date))
 
+
     def load_reservations(self):
         # Effacer les éléments existants
         for item in self.tree_reservations.get_children():
@@ -609,9 +610,10 @@ def make_fullscreen_windowed(self):
     root.geometry(f"{width}x{height}+0+0")
     root.state('zoomed')  # Optional: This makes the window maximized if supported by the OS
 
+
 if __name__ == "__main__":
     root = tk.Tk()
-    root.geometry("900x600")
+    root.geometry("1200x600")
     #make_fullscreen_windowed(root)
     Admin = session.query(Utilisateur).filter_by(nom="Admin").first()
     app = GestionReservationApp(root)
